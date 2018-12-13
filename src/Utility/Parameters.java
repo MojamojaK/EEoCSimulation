@@ -1,4 +1,4 @@
-package Constants;
+package Utility;
 
 public class Parameters {
 

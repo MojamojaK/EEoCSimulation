@@ -1,54 +1,26 @@
 package Action;
 
-import Constants.RewardScheme;
+import Utility.RandomManager;
 
-public class Action {
-
-    public static Action getRandomAction() {
-        if (Math.random() < 0.5) {
-            return new Action(ActionType.COOPERATE);
-        } else {
-            return new Action(ActionType.DEFECT);
-        }
-    }
-
-    public static void setResults(Action a1, Action a2, RewardScheme rewardScheme) {
-        if (a1.type == ActionType.COOPERATE) {
-            if (a2.type == ActionType.COOPERATE) {
-                a1.result = rewardScheme.getR();
-                a2.result = rewardScheme.getR();
-            } else {
-                a1.result = rewardScheme.getS();
-                a2.result = rewardScheme.getT();
-            }
-        } else {
-            if (a2.type == ActionType.COOPERATE) {
-                a1.result = rewardScheme.getT();
-                a2.result = rewardScheme.getS();
-            } else {
-                a1.result = rewardScheme.getP();
-                a2.result = rewardScheme.getP();
-            }
-        }
-    }
-
-    private ActionType type;
-    private int result;
-
-    Action(ActionType type) {
-        this.type = type;
-    }
-
-    int getResult() {
-        return result;
-    }
-
-    public ActionType getType() {
-        return type;
-    }
+public enum Action {
+    COOPERATE,
+    DEFECT,
+    NULL;
 
     @Override
     public String toString() {
-        return String.format("(%s %d)", type, result);
+        if (this == COOPERATE) {
+            return "C";
+        } else {
+            return "D";
+        }
+    }
+
+    public static Action getRandom() {
+        if (RandomManager.nextDouble() < 0.5) {
+            return COOPERATE;
+        } else {
+            return DEFECT;
+        }
     }
 }

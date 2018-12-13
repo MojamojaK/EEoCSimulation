@@ -1,6 +1,7 @@
 package Networks;
 
 import Agent.*;
+import Utility.RandomManager;
 
 import java.util.*;
 
@@ -13,8 +14,6 @@ public class BANetwork extends Network{
         this.setNetworkType("Barabási–Albert");
         this.n = n;
         this.m = m;
-        initializeNetwork();
-        protect();
     }
 
     public void initializeNetwork() {
@@ -40,9 +39,9 @@ public class BANetwork extends Network{
             this.addAgent(newbie);
             int connected = 0;
             while (connected < this.m) {
-                Agent connector = this.getAgentFromIndex((int) (Math.random() * this.agentCount()));
+                Agent connector = this.getAgentFromIndex((int) (RandomManager.nextDouble() * this.agentCount()));
                 if (newbie.isLinkable(connector)) {
-                    if (Math.random() < (double) connector.neighborCount() / this.linkCount()) {
+                    if (RandomManager.nextDouble() < (double) connector.neighborCount() / this.linkCount()) {
                         this.addLink(new Link(connector, newbie));
                         connected++;
                     }

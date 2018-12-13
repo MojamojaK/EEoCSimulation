@@ -27,4 +27,10 @@ public class Link {
     public Agent getLeftAgent() {
         return node[1];
     }
+
+    public void swapAgentIndex() {
+        Agent tmp = node[0];
+        node[0] = node[1];
+        node[1] = tmp;
+    }
 }

@@ -1,12 +1,17 @@
 package Agent;
 
 import Action.*;
+import Learner.Learner;
+import Utility.RandomManager;
 
 import java.util.*;
 
 public class Agent {
 
-    private int id;
+    private int id; // unique ID of agent in network
+
+    private Action action = Action.NULL;
+    public Hashtable<Agent, Learner> neighbors = new Hashtable<>(); // ArrayList of neighbors
 
     public Agent(int id) {
         this.id = id;
@@ -16,10 +21,20 @@ public class Agent {
         return this.id;
     }
 
-    private Hashtable<Agent, Decider> neighbors = new Hashtable<>();
+    public Action getAction() {
+        return this.action;
+    }
+
+    private HashSet<Learner> getDeciders() {
+        return new HashSet<Learner>(neighbors.values());
+    }
 
     public void addNeighbor(Agent neighbor) {
-        neighbors.put(neighbor, new Decider());
+        if (!isNeighbor(neighbor)) {
+            neighbors.put(neighbor, new Learner());
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     public int neighborCount() {
@@ -40,28 +55,35 @@ public class Agent {
         }
     }
 
-    public List<Decider> getAllDeciders() {
-        return new ArrayList<>(neighbors.values());
-    }
-
-    private Decider getDecider(Agent agent) {
-        return neighbors.get(agent);
-    }
-
     // epsilon greedy selection of next action
-    public Action getNextAction(Agent agent, double epsilon) {
-        if (Math.random() < epsilon) {
-            return Action.getRandomAction();
+    public void updateNextAction(double epsilon) {
+        if (RandomManager.nextDouble() < epsilon) {
+            action = Action.getRandom();
+//            log(String.format("Action Epsilon: %s", action));
         } else {
-            return getNextRationalAction(agent);
+            int C = 0, D = 0;
+            for (Learner learner : this.getDeciders()) {
+                Action candidateAction = learner.nextAction();
+                if (candidateAction == Action.COOPERATE) C++;
+                else if (candidateAction == Action.DEFECT) D++;
+                else System.exit(1);
+            }
+            if (C > D) action = Action.COOPERATE;
+            else if (C < D) action = Action.DEFECT;
+            else action = Action.getRandom();
+//            log(String.format("Action Rational(%2d:%2d): %s", C, D, action));
         }
     }
 
-    private Action getNextRationalAction(Agent agent) {
-        return this.getDecider(agent).getNextRationalAction();
+    public void log(String str) {
+        if (this.getId() == 0) System.out.println(str);
     }
 
-    public void updateDecider(Agent agent, Action action, double alpha) {
-        this.getDecider(agent).update(action, alpha);
+    public void initiateLearner(int Q0) {
+        for (Learner learner : neighbors.values()) learner.initiate(Q0);
+    }
+
+    public void updateLearner(Agent opponent, int result, double alpha) {
+        neighbors.get(opponent).update(action, result, alpha);
     }
 }

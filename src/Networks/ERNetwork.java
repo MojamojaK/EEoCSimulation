@@ -1,6 +1,7 @@
 package Networks;
 
 import Agent.Agent;
+import Utility.RandomManager;
 
 import java.util.ListIterator;
 
@@ -16,8 +17,6 @@ public class ERNetwork extends Network{
         if (this.p < 0 || 1 < this.p) {
             throw new IllegalArgumentException("p must be 0 <= p <= 1 !");
         }
-        initializeNetwork();
-        protect();
     }
 
     public void initializeNetwork() {
@@ -32,7 +31,7 @@ public class ERNetwork extends Network{
             while (iterator_c.hasNext()) {
                 Agent charlie = iterator_c.next();
                 if (bravo.isLinkable(charlie)) {
-                    if (Math.random() < this.p) {
+                    if (RandomManager.nextDouble() < this.p) {
                         this.addLink(new Link(bravo, charlie));
                     }
                 }

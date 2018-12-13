@@ -1,18 +1,24 @@
 package Networks;
 
-import Action.ActionType;
-import Action.Decider;
 import Agent.Agent;
+import Utility.RandomManager;
 
 import java.util.*;
 
 public abstract class Network {
 
     private String networkType = "";
-    private List<Agent> agents = new ArrayList<>();
-    private List<Link> links = new ArrayList<>();
+    List<Agent> agents;
+    List<Link> links;
 
     abstract void initializeNetwork();
+
+    public void reset() {
+        agents = new ArrayList<>();
+        links = new ArrayList<>();
+        initializeNetwork();
+        protect();
+    }
 
     void setNetworkType(String str) {
         networkType = str;
@@ -31,15 +37,15 @@ public abstract class Network {
         Collections.reverse(agents);
     }
 
-    int agentCount() {
+    public int agentCount() {
         return agents.size();
     }
 
-    int linkCount() {
+    public int linkCount() {
         return links.size();
     }
 
-    ListIterator<Agent> getAgentIterator() {
+    public ListIterator<Agent> getAgentIterator() {
         return agents.listIterator();
     }
 
@@ -63,18 +69,16 @@ public abstract class Network {
     }
 
     public void initializeQ(int Q0) {
-        for (Agent agent: agents) {
-            for (Decider decider: agent.getAllDeciders()) {
-                decider.setScore(ActionType.COOPERATE, Q0);
-                decider.setScore(ActionType.DEFECT, Q0);
-            }
-        }
+        for (Agent agent: agents) agent.initiateLearner(Q0);
     }
 
-    // makes array lists read-only
+    // makes agent list read-only
     void protect() {
         agents = Collections.unmodifiableList(agents);
-        links = Collections.unmodifiableList(links);
+    }
+
+    public void shuffleLinkOrder() {
+        Collections.shuffle(links, RandomManager.getRandomInstance());
     }
 
     // prints statistics of created network
@@ -86,7 +90,7 @@ public abstract class Network {
         for (Agent agent: agents) {
             if (agent.neighborCount() != neighbors) {
                 if (neighbors != -1) {
-                    System.out.println(String.format("%4d agents have %3d neighbors.", count, neighbors));
+                    System.out.println(String.format("%4d agents has %3d neighbors.", count, neighbors));
                 }
                 neighbors = agent.neighborCount();
                 count = 1;
@@ -94,7 +98,7 @@ public abstract class Network {
                 count++;
             }
         }
-        System.out.println(String.format("%4d agents have %3d neighbors.", count, neighbors));
+        System.out.println(String.format("%4d agents has %3d neighbors.", count, neighbors));
         System.out.println();
     }
 }
